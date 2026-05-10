@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVS Engineering College — Fee Calculator 2026-27</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800;900&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --card: #ffffff;
+    --deep: #eef1f7;
+    --border: #dde2ee;
+    --accent: #1a5cdb;
+    --accent2: #1348b8;
+    --teal: #0ea882;
+    --text: #1a2238;
+    --muted: #6b7a99;
+    --light: #3d4f72;
+    --success: #0ea882;
+    --r: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Open Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background mesh */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 10% 0%, rgba(26,92,219,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 90%, rgba(14,168,130,0.05) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 0 16px 60px; }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 36px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(26,92,219,0.08);
+    border: 1px solid rgba(26,92,219,0.25);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-family: 'Raleway', sans-serif;
+    font-size: clamp(22px, 6vw, 32px);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  h1 span { color: var(--accent); }
+  .sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  /* Step indicator */
+  .steps {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .step-dot {
+    width: 28px; height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background .3s;
+  }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: var(--teal); }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 22px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(26,92,219,0.06);
+  }
+  .card-title {
+    font-family: 'Raleway', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* Form elements */
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+  }
+
+  select, .toggle-group {
+    width: 100%;
+    margin-bottom: 14px;
+  }
+
+  select {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a99' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    transition: border-color .2s;
+  }
+  select:focus { outline: none; border-color: var(--accent); }
+
+  .toggle-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .toggle-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--deep);
+    color: var(--muted);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+  }
+  .toggle-btn:hover { border-color: var(--accent); color: var(--text); }
+  .toggle-btn.active {
+    background: rgba(26,92,219,0.08);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .toggle-btn.active-gold {
+    background: rgba(26,92,219,0.08);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Checkbox row */
+  .check-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--deep);
+    cursor: pointer;
+    transition: all .2s;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .check-item input { display: none; }
+  .check-item.checked {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(26,92,219,0.07);
+  }
+  .check-box {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all .2s;
+  }
+  .check-item.checked .check-box::after { content: '✓'; }
+
+  /* Bus distance select */
+  .bus-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+
+  /* Calculate button */
+  .calc-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #ffffff;
+    font-family: 'Raleway', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    border: none;
+    border-radius: var(--r);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 20px rgba(26,92,219,0.25);
+  }
+  .calc-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,92,219,0.35); }
+  .calc-btn:active { transform: translateY(0); }
+
+  /* Result panel */
+  #result { display: none; }
+  #result.visible { display: block; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .result-title {
+    font-family: 'Raleway', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .reset-btn {
+    font-size: 12px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Open Sans', sans-serif;
+    transition: all .2s;
+  }
+  .reset-btn:hover { color: var(--text); border-color: var(--muted); }
+
+  .fee-breakdown { display: flex; flex-direction: column; gap: 2px; }
+
+  .fee-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(200,210,230,0.7);
+    font-size: 14px;
+  }
+  .fee-row:last-child { border-bottom: none; }
+  .fee-label { color: var(--light); }
+  .fee-label small { display: block; font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .fee-value { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+  .fee-value.per-year { color: var(--teal); }
+
+  /* Year cards grid */
+  .year-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 400px) {
+    .year-cards { grid-template-columns: 1fr 1fr; }
+  }
+
+  .year-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 16px 14px;
+    box-shadow: 0 2px 10px rgba(26,92,219,0.06);
+    position: relative;
+    overflow: hidden;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .year-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(26,92,219,0.12); }
+
+  .year-card.year-1 { border-top: 3px solid var(--accent); }
+  .year-card.year-2 { border-top: 3px solid var(--teal); }
+  .year-card.year-3 { border-top: 3px solid #f59e0b; }
+  .year-card.year-4 { border-top: 3px solid #8b5cf6; }
+
+  .year-tag {
+    font-family: 'Raleway', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .year-1 .year-tag { color: var(--accent); }
+  .year-2 .year-tag { color: var(--teal); }
+  .year-3 .year-tag { color: #f59e0b; }
+  .year-4 .year-tag { color: #8b5cf6; }
+
+  .year-amount {
+    font-family: 'Raleway', sans-serif;
+    font-size: clamp(18px, 5vw, 24px);
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .year-note {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .year-badge {
+    position: absolute;
+    top: 12px; right: 10px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+  .year-1 .year-badge { background: rgba(26,92,219,0.1); color: var(--accent); }
+  .year-2 .year-badge,
+  .year-3 .year-badge,
+  .year-4 .year-badge { background: rgba(107,122,153,0.1); color: var(--muted); }
+
+  /* Grand total */
+  .grand-total-card {
+    background: linear-gradient(135deg, var(--accent) 0%, #1348b8 100%);
+    border-radius: var(--r);
+    padding: 22px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 24px rgba(26,92,219,0.3);
+  }
+  .gt-label {
+    font-family: 'Raleway', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+  }
+  .gt-label span { display: block; font-size: 11px; margin-top: 3px; color: rgba(255,255,255,0.5); }
+  .gt-amount {
+    font-family: 'Raleway', sans-serif;
+    font-size: clamp(26px, 7vw, 36px);
+    font-weight: 800;
+    color: #fff;
+  }
+  .gt-amount small { font-size: 16px; font-weight: 600; }
+
+  /* Info chip */
+  .info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(122,143,176,0.1);
+    border: 1px solid rgba(122,143,176,0.2);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0 14px;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 400px) {
+    .bus-row { grid-template-columns: 1fr; }
+    .total-card { flex-direction: column; align-items: flex-start; gap: 8px; }
+  }
+
+  /* Animations */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card { animation: slideUp .4s ease both; }
+  .card:nth-child(2) { animation-delay: .05s; }
+  .card:nth-child(3) { animation-delay: .1s; }
+  .card:nth-child(4) { animation-delay: .15s; }
+
+  #result .card { animation: slideUp .35s ease both; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="badge">Updated 8-5-26 · Academic Year 2026–2027</div>
+    <h1>AVS Engineering<br><span>Fee Calculator</span></h1>
+    <p class="sub">Autonomous Institution · Estimate your annual fee structure</p>
+  </header>
+
+  <!-- Input Section -->
+  <div id="inputSection">
+
+    <!-- Programme Type -->
+    <div class="card">
+      <div class="card-title">Programme</div>
+
+      <label>Programme Type</label>
+      <div class="toggle-group" id="pgType">
+        <button class="toggle-btn active" onclick="setPgType('UG',this)">UG (B.E.)</button>
+        <button class="toggle-btn" onclick="setPgType('LE',this)">Lateral Entry</button>
+        <button class="toggle-btn" onclick="setPgType('PG',this)">PG (M.E./MBA/MCA)</button>
+      </div>
+
+      <label>Course</label>
+      <select id="course" onchange="onCourseChange()"></select>
+    </div>
+
+    <!-- Category -->
+    <div class="card">
+      <div class="card-title">Category & Quota</div>
+
+      <label>Community Category</label>
+      <div class="toggle-group" id="category">
+        <button class="toggle-btn active" onclick="setCategory('OC',this)">OC</button>
+        <button class="toggle-btn" onclick="setCategory('BC_MBC',this)">BC / MBC</button>
+        <button class="toggle-btn" onclick="setCategory('SC_ST',this)">SC / ST</button>
+      </div>
+
+      <label>Quota</label>
+      <div class="toggle-group" id="quota">
+        <button class="toggle-btn active" onclick="setQuota('GQ',this)">Government (GQ)</button>
+        <button class="toggle-btn" onclick="setQuota('MQ',this)">Management (MQ)</button>
+      </div>
+
+      <!-- FG/NFG — shown only when GQ + OC or BC/MBC + UG/LE -->
+      <div id="fgOptions" style="display:block">
+        <label>First Graduate Status</label>
+        <div class="toggle-group" id="fgType">
+          <button class="toggle-btn active" onclick="setFgType('NFG',this)">NFG <small style="font-size:10px;display:block;margin-top:1px">Non-First Graduate</small></button>
+          <button class="toggle-btn" onclick="setFgType('FG',this)">FG <small style="font-size:10px;display:block;margin-top:1px">First Graduate</small></button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Add-ons -->
+    <div class="card">
+      <div class="card-title">Add-ons</div>
+
+      <label>Optional Services</label>
+      <div class="check-row" id="addons">
+        <label class="check-item" onclick="toggleAddon('hostel',this)">
+          <span class="check-box"></span> Hostel
+        </label>
+        <label class="check-item" onclick="toggleAddon('bus',this)">
+          <span class="check-box"></span> Bus Transport
+        </label>
+        <label class="check-item" onclick="toggleAddon('blazer',this)">
+          <span class="check-box"></span> Blazer (MBA/MCA)
+        </label>
+      </div>
+
+      <!-- Hostel options -->
+      <div id="hostelOptions" style="display:none">
+        <div class="divider"></div>
+        <label>Hostel Type</label>
+        <div class="toggle-group" id="acType">
+          <button class="toggle-btn active" onclick="setAcType('non_ac',this)">Non-AC</button>
+          <button class="toggle-btn" onclick="setAcType('ac',this)">AC</button>
+        </div>
+        <label>Gender</label>
+        <div class="toggle-group" id="gender">
+          <button class="toggle-btn active" onclick="setGender('boys',this)">Boys</button>
+          <button class="toggle-btn" onclick="setGender('girls',this)">Girls</button>
+        </div>
+      </div>
+
+      <!-- Bus options -->
+      <div id="busOptions" style="display:none">
+        <div class="divider"></div>
+        <label>Distance from College</label>
+        <select id="busKm" style="margin-bottom:0">
+          <option value="3000">Less than 3 km — ₹3,000/sem</option>
+          <option value="4000">4 to 10 km — ₹4,000/sem</option>
+          <option value="5000">11 to 20 km — ₹5,000/sem</option>
+          <option value="7000">21 to 50 km — ₹7,000/sem</option>
+          <option value="8000">Above 50 km — ₹8,000/sem</option>
+        </select>
+      </div>
+
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">Calculate My Fee →</button>
+  </div>
+
+  <!-- Result Section -->
+  <div id="result">
+    <div class="card">
+      <div class="result-header">
+        <div class="result-title">Fee Breakdown</div>
+        <button class="reset-btn" onclick="resetForm()">← Edit</button>
+      </div>
+      <div class="fee-breakdown" id="breakdownRows"></div>
+    </div>
+
+    <!-- Year cards -->
+    <div id="yearCardsWrap"></div>
+
+    <!-- Grand total -->
+    <div class="grand-total-card" id="grandTotalCard"></div>
+  </div>
+
+</div>
+
+<script>
+// ===================== DATA =====================
+
+const UG_FEES = {
+  CSE:        { OC_NFG:{GQ:55000,MQ:62500}, OC_BC_M_FG:{GQ:42500,MQ:30000}, SC_ST:{GQ:37500,MQ:37500} },
+  AI:         { OC_NFG:{GQ:55000,MQ:62500}, OC_BC_M_FG:{GQ:42500,MQ:30000}, SC_ST:{GQ:37500,MQ:37500} },
+  'CSE(AIML)':{ OC_NFG:{GQ:55000,MQ:62500}, OC_BC_M_FG:{GQ:42500,MQ:30000}, SC_ST:{GQ:37500,MQ:37500} },
+  IT:         { OC_NFG:{GQ:52500,MQ:60000}, OC_BC_M_FG:{GQ:40000,MQ:27500}, SC_ST:{GQ:35000,MQ:35000} },
+  ECE:        { OC_NFG:{GQ:52500,MQ:60000}, OC_BC_M_FG:{GQ:40000,MQ:27500}, SC_ST:{GQ:35000,MQ:35000} },
+  EEE:        { OC_NFG:{GQ:40000,MQ:42500}, OC_BC_M_FG:{GQ:27500,MQ:15000}, SC_ST:{GQ:30000,MQ:30000} },
+  BME:        { OC_NFG:{GQ:45000,MQ:47500}, OC_BC_M_FG:{GQ:32500,MQ:20000}, SC_ST:{GQ:25000,MQ:25000} },
+  MECH:       { OC_NFG:{GQ:40000,MQ:42500}, OC_BC_M_FG:{GQ:27500,MQ:15000}, SC_ST:{GQ:25000,MQ:25000} },
+  CIVIL:      { OC_NFG:{GQ:35000,MQ:37500}, OC_BC_M_FG:{GQ:22500,MQ:10000}, SC_ST:{GQ:25000,MQ:25000} },
+};
+
+// Lateral Entry uses same UG fee structure, 3 years
+const LE_FEES = UG_FEES;
+
+const PG_FEES = {
+  MBA:      { OC_BC_MBC:{GQ:30000,MQ:30000}, SC_ST:{GQ:12500,MQ:12500} },
+  MCA:      { OC_BC_MBC:{GQ:30000,MQ:30000}, SC_ST:{GQ:12500,MQ:12500} },
+  'ME-CSE': { OC_BC_MBC:{GQ:0,MQ:30000},    SC_ST:{GQ:0,MQ:5000} },
+  'ME-AIML':{ OC_BC_MBC:{GQ:0,MQ:30000},    SC_ST:{GQ:0,MQ:5000} },
+  'ME-VLSI':{ OC_BC_MBC:{GQ:0,MQ:25000},    SC_ST:{GQ:0,MQ:0} },
+  'ME-PED': { OC_BC_MBC:{GQ:0,MQ:25000},    SC_ST:{GQ:0,MQ:0} },
+  'ME-ED':  { OC_BC_MBC:{GQ:0,MQ:25000},    SC_ST:{GQ:0,MQ:0} },
+  'ME-STRU':{ OC_BC_MBC:{GQ:0,MQ:25000},    SC_ST:{GQ:0,MQ:0} },
+};
+
+const HOSTEL = {
+  non_ac: { boys: {admission:5000,deposit:5000,rent:27000,mess:48000},
+            girls:{admission:5000,deposit:5000,rent:27000,mess:46800},
+            sc_st:{admission:5000,deposit:5000,rent:27000,mess:45600} },
+  ac:     { boys: {admission:5000,deposit:5000,rent:54600,mess:48000},
+            girls:{admission:5000,deposit:5000,rent:54600,mess:46800} }
+};
+
+// Application fee: GQ = Appln only (no consortium); MQ = Appln + Consortium
+// Consortium fee is MQ ONLY
+const APP_FEES = {
+  UG: {
+    GQ:           { appln:1000, consortium:0 },
+    MQ_OC_BC_MBC: { appln:1000, consortium:600 },
+    MQ_SC_ST:     { appln:1000, consortium:350 },
+  },
+  LE: {
+    GQ:           { appln:1000, consortium:0 },
+    MQ_OC_BC_MBC: { appln:1000, consortium:0 },
+    MQ_SC_ST:     { appln:1000, consortium:0 },
+  },
+  PG: {
+    GQ:           { appln:1250, consortium:0 },
+    MQ_OC_BC_MBC: { appln:1250, consortium:600 },
+    MQ_SC_ST:     { appln:1250, consortium:350 },
+  },
+};
+
+const ADMISSION_FEE = 10000; // Tamil Nadu
+const BLAZER_FEE = { MBA: 2500, MCA: 2500 };
+
+// ===================== STATE =====================
+let state = {
+  pgType: 'UG',
+  course: 'CSE',
+  category: 'OC',
+  fgType: 'NFG',
+  quota: 'GQ',
+  hostel: false,
+  bus: false,
+  blazer: false,
+  acType: 'non_ac',
+  gender: 'boys',
+  busKm: 3000,
+  includeAppFee: true
+};
+
+// ===================== COURSE POPULATION =====================
+function populateCourses() {
+  const sel = document.getElementById('course');
+  sel.innerHTML = '';
+  let courses = state.pgType === 'PG' ? Object.keys(PG_FEES) : Object.keys(UG_FEES);
+  courses.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+  state.course = courses[0];
+}
+
+function onCourseChange() {
+  state.course = document.getElementById('course').value;
+}
+
+// ===================== SETTERS =====================
+function setPgType(val, el) {
+  state.pgType = val;
+  document.querySelectorAll('#pgType .toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  populateCourses();
+  updateCategoryUI();
+}
+
+function updateCategoryUI() {
+  const isPG = state.pgType === 'PG';
+  const showFg = !isPG && state.category !== 'SC_ST' && state.quota === 'GQ';
+  document.getElementById('fgOptions').style.display = showFg ? 'block' : 'none';
+}
+
+function setCategory(val, el) {
+  state.category = val;
+  document.querySelectorAll('#category .toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  updateCategoryUI();
+}
+
+function setFgType(val, el) {
+  state.fgType = val;
+  document.querySelectorAll('#fgType .toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setQuota(val, el) {
+  state.quota = val;
+  document.querySelectorAll('#quota .toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  updateCategoryUI();
+}
+
+function toggleAddon(type, el) {
+  el.classList.toggle('checked');
+  state[type] = el.classList.contains('checked');
+  if (type === 'hostel') document.getElementById('hostelOptions').style.display = state.hostel ? 'block' : 'none';
+  if (type === 'bus')    document.getElementById('busOptions').style.display    = state.bus    ? 'block' : 'none';
+}
+
+function setAcType(val, el) {
+  state.acType = val;
+  document.querySelectorAll('#acType .toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setGender(val, el) {
+  state.gender = val;
+  document.querySelectorAll('#gender .toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setAppFee(val, el) {
+  state.includeAppFee = val;
+  document.querySelectorAll('#appFee .toggle-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ===================== CALCULATE =====================
+function getCategoryKey() {
+  if (state.pgType === 'PG') {
+    return (state.category === 'SC_ST') ? 'SC_ST' : 'OC_BC_MBC';
+  }
+  // UG / LE
+  if (state.category === 'SC_ST') return 'SC_ST';
+  // FG only applies when GQ is selected
+  if (state.quota === 'GQ' && state.fgType === 'FG') return 'OC_BC_M_FG';
+  return 'OC_NFG';
+}
+
+function getTuitionFeePerSem() {
+  const cKey = getCategoryKey();
+  const q = state.quota;
+  if (state.pgType === 'PG') {
+    const row = PG_FEES[state.course];
+    if (!row) return 0;
+    const cat = (cKey === 'SC_ST') ? row.SC_ST : row.OC_BC_MBC;
+    return cat ? (cat[q] || 0) : 0;
+  } else {
+    const row = UG_FEES[state.course];
+    if (!row) return 0;
+    // OC and BC/MBC use same column in UG table → OC_NFG or BC_MBC_NFG
+    let col;
+    if (cKey === 'SC_ST') col = row.SC_ST;
+    else if (cKey === 'OC_BC_M_FG') col = row.OC_BC_M_FG;
+    else col = row.OC_NFG; // OC & BC/MBC NFG
+    return col ? (col[q] || 0) : 0;
+  }
+}
+
+function getYears() {
+  if (state.pgType === 'PG') {
+    if (state.course === 'MBA' || state.course === 'MCA') return 2;
+    return 2; // ME = 2 years
+  }
+  if (state.pgType === 'LE') return 3;
+  return 4;
+}
+
+function getAppFeeKey() {
+  if (state.quota === 'GQ') return 'GQ';
+  if (state.category === 'SC_ST') return 'MQ_SC_ST';
+  return 'MQ_OC_BC_MBC';
+}
+
+function getAppFees() {
+  if (!state.includeAppFee) return { appln: 0, consortium: 0 };
+  const tbl = APP_FEES[state.pgType] || APP_FEES.UG;
+  const key = getAppFeeKey();
+  return tbl[key] || { appln: 0, consortium: 0 };
+}
+
+function fmt(n) {
+  return '₹' + n.toLocaleString('en-IN');
+}
+
+function calculate() {
+  state.course = document.getElementById('course').value;
+  state.busKm = parseInt(document.getElementById('busKm').value);
+
+  const tuitionPerSem = getTuitionFeePerSem();
+  const tuitionPerYear = tuitionPerSem * 2;
+  const years = getYears();
+
+  // Hostel (per year)
+  let hostelBreakdown = [];
+  if (state.hostel) {
+    const h = HOSTEL[state.acType];
+    let row;
+    if (state.category === 'SC_ST' && state.acType === 'non_ac') {
+      row = h.sc_st;
+    } else {
+      row = h[state.gender] || h.boys;
+    }
+    hostelBreakdown = [
+      { label: 'Hostel Admission', small: 'One-time', amt: row.admission, oneTime: true },
+      { label: 'Hostel Deposit',   small: 'One-time', amt: row.deposit,   oneTime: true },
+      { label: 'Rent & EB',        small: 'Per year', amt: row.rent },
+      { label: 'Mess Charges',     small: 'Per year', amt: row.mess },
+    ];
+  }
+
+  // Bus (per year = 2 sems)
+  const busYear = state.bus ? state.busKm * 2 : 0;
+
+  // Blazer
+  const blazerFee = (state.blazer && BLAZER_FEE[state.course]) ? BLAZER_FEE[state.course] : 0;
+
+  // Build rows
+  const rows = [];
+
+  // Tuition
+  rows.push({
+    label: 'Tuition Fee',
+    small: tuitionPerYear > 0 ? 'Per year (2 sems × ' + fmt(tuitionPerSem) + ')' : 'NIL for this category/quota',
+    amt: tuitionPerYear
+  });
+
+  // One-time fees
+  rows.push({ label: 'Admission Fee',   small: 'One-time · Tamil Nadu',   amt: ADMISSION_FEE, oneTime: true });
+  if (blazerFee > 0)     rows.push({ label: 'Blazer Fee',       small: 'One-time',             amt: blazerFee,     oneTime: true });
+
+  // Hostel
+  if (state.hostel) hostelBreakdown.forEach(r => rows.push(r));
+
+  // Bus
+  if (state.bus) rows.push({ label: 'Bus Transport', small: 'Per year (2 sems × ' + fmt(state.busKm) + ')', amt: busYear });
+
+  // Compute totals
+  const oneTimeFees   = rows.filter(r =>  r.oneTime).reduce((s, r) => s + r.amt, 0);
+  const recurringFees = rows.filter(r => !r.oneTime).reduce((s, r) => s + r.amt, 0);
+  const firstYearTotal = oneTimeFees + recurringFees;
+  const totalCourse    = firstYearTotal + recurringFees * (years - 1);
+
+  // Render fee breakdown rows
+  const tbody = document.getElementById('breakdownRows');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'fee-row';
+    div.innerHTML = `
+      <div class="fee-label">${r.label} <small>${r.small || ''}</small></div>
+      <div class="fee-value ${r.oneTime ? '' : 'per-year'}">${r.amt === 0 ? 'NIL' : fmt(r.amt)}</div>
+    `;
+    tbody.appendChild(div);
+  });
+
+  // Build per-year cards
+  const colors = ['year-1','year-2','year-3','year-4'];
+  const yearLabels = ['1st Year','2nd Year','3rd Year','4th Year'];
+  const yearWrap = document.getElementById('yearCardsWrap');
+  yearWrap.innerHTML = `<div class="year-cards" id="yearCardsGrid"></div>`;
+  const grid = document.getElementById('yearCardsGrid');
+
+  for (let y = 1; y <= years; y++) {
+    const amt = y === 1 ? firstYearTotal : recurringFees;
+    const isFirst = y === 1;
+    const card = document.createElement('div');
+    card.className = `year-card ${colors[y-1]}`;
+    card.innerHTML = `
+      <div class="year-tag">${yearLabels[y-1]}</div>
+      ${isFirst ? `<span class="year-badge">Incl. one-time</span>` : `<span class="year-badge">Recurring</span>`}
+      <div class="year-amount">${fmt(amt)}</div>
+      <div class="year-note">${isFirst ? 'Tuition + one-time fees' : 'Tuition' + (state.hostel ? ' + Hostel' : '') + (state.bus ? ' + Bus' : '')}</div>
+    `;
+    grid.appendChild(card);
+  }
+
+  // Grand total card
+  document.getElementById('grandTotalCard').innerHTML = `
+    <div>
+      <div class="gt-label">Total Course Fee<span>${years}-Year Programme</span></div>
+    </div>
+    <div class="gt-amount"><small>₹</small>${totalCourse.toLocaleString('en-IN')}</div>
+  `;
+
+  // Switch views
+  document.getElementById('inputSection').style.display = 'none';
+  const res = document.getElementById('result');
+  res.style.display = 'block';
+  res.classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetForm() {
+  document.getElementById('inputSection').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+}
+
+// ===================== INIT =====================
+populateCourses();
+</script>
+</body>
+</html>
